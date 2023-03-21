@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div>
+      <p>your payment was successfull!</p>
+      <a href="/" style="display: none" class="sp-again">
+        <button>Shop Again</button>
+      </a>
+    </div>
+
+    <script>
+      const serverLink = "https://zeyad-back-end.onrender.com";
+
+      const storeemail = new URLSearchParams(window.location.search).get(
+        "storeemail"
+      );
+      let obj = { storeemail };
+      let prices = JSON.parse(localStorage.getItem("zeyadStore")).map(
+        ({ price_ }) => ({ price: Number(price_.split("$")[1]) })
+      );
+
+      let totalPrice = prices.reduce((acc, itm) => {
+        return (acc += itm.price);
+      }, 0);
+
+      obj.totalPrice = totalPrice;
+
+      let data = JSON.parse(localStorage.getItem("zeyadStore")).map(
+        ({ price_, name_ }) => ({ price: price_, name: name_ })
+      );
+
+      obj.data = data;
+      obj.date = new Date();
+
+      console.log(obj);
+
+      (async () => {
+        let res = await fetch(`${serverLink}/api/user/paid`, {
+          method: "POST",
+          mode: "cors",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(obj),
+        });
+
+        console.log(res);
+
+        let resData = await res.json();
+
+        if (resData.data === "user added!") {
+          localStorage.setItem("zeyadStore", JSON.stringify([]));
+
+          document.querySelector(".sp-again").style.display = "inherit";
+        }
+      })();
+    </script>
+  </body>
+</html>
